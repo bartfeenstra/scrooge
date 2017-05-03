@@ -1,16 +1,16 @@
-from django.core.exceptions import ValidationError
 from django.db import models
 from django_iban.fields import IBANField
-import re
+from djmoney.models.fields import MoneyField
 
 
-def validate_currency_code(value: str):
-    if re.match('^[A-Z]{3}$', value) is None:
-        raise ValidationError('%s is not a valid ISO 4217 currency code.' % value)
+class Account(models.Model):
+    number = IBANField(primary_key=True)
+    name = models.CharField(max_length=255, blank=True, default='')
 
 
 class Transaction(models.Model):
-    # @todo Find out IBAN specs and add validation.
-    origin_account_number = IBANField(max_length=34)
-    recipient_account_number = IBANField(max_length=34)
-    currency_code = models.CharField(max_length=3, validators=[validate_currency_code])
+    # The account under which to log this transaction.
+    own_account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='origin_account_number')
+    # The optional account from which the transaction came, or to which it went.
+    remote_account_number = models.CharField(max_length=35, default='', blank=True)
+    amount = MoneyField(max_digits=10, decimal_places=3)
