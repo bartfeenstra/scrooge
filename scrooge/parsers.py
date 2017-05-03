@@ -1,8 +1,10 @@
 import abc
 from contracts import contract
-from scrooge.models import Transaction
+from scrooge.models import Transaction, Account
 import csv
 from typing import Iterable, Sequence
+from moneyed import Money, get_currency
+from decimal import Decimal
 
 
 class Parser(object):
@@ -23,12 +25,36 @@ class RabobankCsvParser(Parser):
         with open(source, newline='') as file:
             reader = csv.reader(file)
             for row in reader:
-                yield self._convert(row)
+                yield self.convert_row(row)
 
     @contract
-    def _convert(self, row: Sequence[str]) -> Transaction:
+    def convert_row(self, row: Sequence[str]) -> Transaction:
+
+        # CSV format documentation is available at
+        #  https://www.rabobank.nl/images/formaatbeschrijving_csv_kommagescheiden_nieuw_29539176.pdf. The colums are:
+        # 1)  IBAN of own bank account. Required.
+        # 2)  ISO 4217 currency code.
+        # 3)  Interest date. ^\d{6}$ (YYYYMMDD).
+        # 4)  "D" for debit and "C" for credit transactions respectively.
+        # 5)  Two-decimal amount, with a period as decimal separator. Max 14 characters.
+        # 6)  Number of the remote bank account. Optional. Max 35 characters.
+        # 7)  Recipient name. Max 70 characters.
+        # 8)  Transaction date. ^\d{6}$ (YYYYMMDD).
+        # 9)  Booking code. 2 characters.
+        # 10) Filler. Max 6 characters.
+        # 11) Description, line 1. Max 35 characters.
+        # 12) Description, line 2. Max 35 characters.
+        # 13) Description, line 3. Max 35 characters.
+        # 14) Description, line 4. Max 35 characters.
+        # 15) Description, line 5. Max 35 characters.
+        # 16) Description, line 6. Max 35 characters.
+        # 17) SEPA credit transfer end-to-end ID. Max 35 characters.
+        # 18) SEPA credit transfer remove account ID. Max 35 characters.
+        # 19) SEPA direct debit mandate ID. Max 35 characters.
         transaction = Transaction()
-        transaction.currency_code = row[1]
+        own_account, own_account_created = Account.objects.get_or_create(number=row[0])
+        transaction.own_account = own_account
+        transaction.amount = Money(Decimal(row[4]), get_currency(row[1]))
         return transaction
 
 
