@@ -1,0 +1,16 @@
+language: python
+
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+
+install:
+  - ./bin/build
+  - python manage.py makemigrations
+  - python manage.py migrate
+
+script:
+  - python manage.py import rabobank-csv ./examples/rabobank.csv
+
+
