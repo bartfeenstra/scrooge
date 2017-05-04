@@ -38,7 +38,7 @@ class RabobankCsvParser(Parser):
         # 5)  Two-decimal amount, with a period as decimal separator. Max 14
         #     characters.
         # 6)  Number of the remote bank account. Optional. Max 35 characters.
-        # 7)  Recipient name. Max 70 characters.
+        # 7)  Remote name. Max 70 characters.
         # 8)  Transaction date. ^\d{6}$ (YYYYMMDD).
         # 9)  Booking code. 2 characters.
         # 10) Filler. Max 6 characters.
@@ -55,7 +55,10 @@ class RabobankCsvParser(Parser):
         own_account, own_account_created = Account.objects.get_or_create(
             number=row[0])
         transaction.own_account = own_account
+        transaction.remote_name = row[6]
         transaction.amount = Money(Decimal(row[4]), get_currency(row[1]))
+        transaction.description = ' '.join(
+            [row[10], row[11], row[12], row[13], row[14], row[15]]).strip()
         return transaction
 
 

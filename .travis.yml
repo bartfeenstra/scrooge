@@ -9,6 +9,6 @@ install:
   - python manage.py migrate
 
 script:
-  - python manage.py import rabobank-csv ./examples/rabobank.csv
+  - ./bin/test
 
 

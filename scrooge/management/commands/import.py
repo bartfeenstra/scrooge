@@ -4,6 +4,7 @@ import os
 from contracts import contract
 from django.core.management.base import BaseCommand
 from scrooge.parsers import get_parser
+from scrooge.processors import get_processors
 
 
 @contract()
@@ -28,6 +29,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         source = options['source'][0]
         parser = options['format'][0]
+        processors = get_processors()
 
         transactions = parser.parse(source)
 
@@ -35,8 +37,14 @@ class Command(BaseCommand):
         start_time = time.time()
         timer = start_time
         for transaction in transactions:
-            count += 1
+            # Save the transaction, so processors have a primary key to work
+            #  with.
             transaction.save()
+            for processor in processors:
+                processor.process(transaction)
+            # Save any changes the processors made.
+            transaction.save()
+            count += 1
             if time.time() - 1 > timer:
                 timer = time.time()
                 self._log(count, start_time)

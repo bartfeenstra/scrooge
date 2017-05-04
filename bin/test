@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
 flake8 --exclude=scrooge/migrations ./scrooge
+python manage.py import rabobank-csv ./examples/rabobank.csv
