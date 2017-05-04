@@ -4,7 +4,7 @@ python:
   - "3.5"
 
 install:
-  - ./bin/build
+  - ./bin/build-dev
   - python manage.py makemigrations
   - python manage.py migrate
 
