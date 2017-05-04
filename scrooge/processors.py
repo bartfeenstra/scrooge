@@ -1,8 +1,9 @@
+from typing import Sequence
+
 import abc
+import re
 from contracts import contract
 from scrooge.models import Transaction, Tag
-from typing import Sequence
-import re
 
 
 class Processor(object):
@@ -31,23 +32,28 @@ class AlbertHeijn(TaggingProcessor):
                 'AH to go',
             ]
             for needle in needles:
-                if re.fullmatch('^.*%s.*$' % needle, transaction.description, re.I) is not None:
+                if re.fullmatch('^.*%s.*$' % needle, transaction.description,
+                                re.I) is not None:
                     self.add_tag(transaction, 'albert-heijn')
 
 
 class Atm(TaggingProcessor):
     @contract
     def process(self, transaction: Transaction):
-        # @todo Maybe this can be done through the "ga" Rabobank CSV transaction type.
-        if re.fullmatch('^.*Geldautomaat \d\d:\d\d pasnr. \d\d\d.*$', transaction.description) is not None:
+        # @todo Maybe this can be done through the "ga" Rabobank CSV
+        #  transaction type.
+        if re.fullmatch('^.*Geldautomaat \d\d:\d\d pasnr. \d\d\d.*$',
+                        transaction.description) is not None:
             self.add_tag(transaction, 'atm')
 
 
 class Pos(TaggingProcessor):
     @contract
     def process(self, transaction: Transaction):
-        # @todo Maybe this can be done through the "ba" Rabobank CSV transaction type.
-        if re.fullmatch('^.*Betaalautomaat \d\d:\d\d pasnr. \d\d\d.*$', transaction.description) is not None:
+        # @todo Maybe this can be done through the "ba" Rabobank CSV
+        #  transaction type.
+        if re.fullmatch('^.*Betaalautomaat \d\d:\d\d pasnr. \d\d\d.*$',
+                        transaction.description) is not None:
             self.add_tag(transaction, 'pos')
 
 

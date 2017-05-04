@@ -14,9 +14,12 @@ class Tag(models.Model):
 
 class Transaction(models.Model):
     # The account under which to log this transaction.
-    own_account = models.ForeignKey(Account, on_delete=models.PROTECT, related_name='origin_account_number')
-    # The optional account from which the transaction came, or to which it went.
-    remote_account_number = models.CharField(max_length=255, default='', blank=True)
+    own_account = models.ForeignKey(Account, on_delete=models.PROTECT,
+                                    related_name='origin_account_number')
+    # The optional account from which the transaction came, or to which it
+    #  went.
+    remote_account_number = models.CharField(max_length=255, default='',
+                                             blank=True)
     remote_name = models.CharField(max_length=255, default='', blank=True)
     amount = MoneyField(max_digits=10, decimal_places=3)
     tags = models.ManyToManyField(Tag)

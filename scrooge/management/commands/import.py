@@ -1,9 +1,11 @@
+import time
+
+import os
 from contracts import contract
 from django.core.management.base import BaseCommand
-import os
 from scrooge.parsers import get_parser
 from scrooge.processors import get_processors
-import time
+
 
 @contract()
 def get_source(source: str) -> str:
@@ -35,18 +37,22 @@ class Command(BaseCommand):
         start_time = time.time()
         timer = start_time
         for transaction in transactions:
-            # Save the transaction, so processors have a primary key to work with.
+            # Save the transaction, so processors have a primary key to work
+            #  with.
             transaction.save()
             for processor in processors:
                 processor.process(transaction)
             # Save any changes the processors made.
             transaction.save()
             count += 1
-            if time.time() -1 > timer:
+            if time.time() - 1 > timer:
                 timer = time.time()
                 self._log(count, start_time)
         self._log(count, start_time)
 
     @contract
     def _log(self, count: int, start_time: float):
-        self.stdout.write(self.style.SUCCESS('Imported %d transaction(s) in %d second(s).' % (count, time.time() - start_time)))
+        self.stdout.write(
+            self.style.SUCCESS(
+                'Imported %d transaction(s) in %d second(s).' % (
+                    count, time.time() - start_time)))

@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-python manage.py import rabobank-csv ./examples/rabobank.csv
+(
+    cd `dirname "$0"`/.. &&
+    flake8 --exclude=scrooge/migrations ./scrooge &&
+    python manage.py import rabobank-csv ./examples/rabobank.csv
+)
