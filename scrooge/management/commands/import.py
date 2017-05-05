@@ -38,7 +38,7 @@ class Command(BaseCommand):
         timer = start_time
         for transaction in transactions:
             # Save the transaction, so processors have a primary key to work
-            #  with.
+            # with.
             transaction.save()
             for processor in processors:
                 processor.process(transaction)
@@ -54,5 +54,5 @@ class Command(BaseCommand):
     def _log(self, count: int, start_time: float):
         self.stdout.write(
             self.style.SUCCESS(
-                'Imported %d transaction(s) in %d second(s).' % (
+                'Imported %d new transaction(s) in %d second(s).' % (
                     count, time.time() - start_time)))
