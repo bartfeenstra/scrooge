@@ -1,8 +1,9 @@
 import csv
 from decimal import Decimal
-from typing import Iterable, Sequence
+from typing import Iterable, Sequence, Dict, Optional
 
 import abc
+import hashlib
 from contracts import contract
 from moneyed import Money, get_currency
 from scrooge.models import Transaction, Account
@@ -24,10 +25,14 @@ class RabobankCsvParser(Parser):
         with open(source, newline='') as file:
             reader = csv.reader(file)
             for row in reader:
-                yield self.convert_row(row)
+                transaction = self.convert_row(row)
+                if transaction is not None:
+                    yield transaction
 
-    @contract
-    def convert_row(self, row: Sequence[str]) -> Transaction:
+    # @todo Enforcing types through the contract() annotation causes an
+    #   error to be raised during the check.
+    # @contract
+    def convert_row(self, row: Sequence[str]) -> Optional[Transaction]:
         # CSV format documentation is available at
         # https://www.rabobank.nl/images/formaatbeschrijving_csv_kommagescheiden_nieuw_29539176.pdf.
         # The colums are:
@@ -51,11 +56,19 @@ class RabobankCsvParser(Parser):
         # 17) SEPA credit transfer end-to-end ID. Max 35 characters.
         # 18) SEPA credit transfer remove account ID. Max 35 characters.
         # 19) SEPA direct debit mandate ID. Max 35 characters.
+
+        remote_id = 'rabobank-csv:' + hashlib.sha256(
+            "\n".join(row).encode('utf-8')).hexdigest()
+
+        if Transaction.objects.filter(remote_id=remote_id).exists():
+            return None
+
         transaction = Transaction()
+        transaction.remote_id = remote_id
         own_account, own_account_created = Account.objects.get_or_create(
             number=row[0])
         transaction.own_account = own_account
-        transaction.remote_name = row[6]
+        transaction.opposing_name = row[6]
         transaction.amount = Money(Decimal(row[4]), get_currency(row[1]))
         transaction.description = ' '.join(
             [row[10], row[11], row[12], row[13], row[14], row[15]]).strip()
@@ -63,7 +76,7 @@ class RabobankCsvParser(Parser):
 
 
 @contract
-def get_parsers() -> dict:
+def get_parsers() -> Dict[str, Parser]:
     return {
         "rabobank-csv": RabobankCsvParser(),
     }
