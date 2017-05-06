@@ -54,5 +54,5 @@ class Command(BaseCommand):
     def _log(self, count: int, start_time: float):
         self.stdout.write(
             self.style.SUCCESS(
-                'Imported %d new transaction(s) in %d second(s).' % (
+                'Imported %d transaction(s) in %d second(s).' % (
                     count, time.time() - start_time)))

@@ -13,7 +13,14 @@ class Tag(models.Model):
 
 
 class Transaction(models.Model):
+    # The ID of the original, remote transaction.
     remote_id = models.CharField(max_length=255, unique=True)
+    # The date-time the original, remote transaction was made.
+    remote_date = models.DateTimeField()
+    # The date-time the transaction was created.
+    created = models.DateTimeField(auto_now_add=True)
+    # The date-time the transaction was last updated.
+    update = models.DateTimeField(auto_now=True)
     # The account under which to log this transaction.
     own_account = models.ForeignKey(Account, on_delete=models.PROTECT,
                                     related_name='origin_account_number')
