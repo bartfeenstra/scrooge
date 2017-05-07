@@ -60,12 +60,27 @@ class RabobankCsvParser(Parser):
             "\n".join(row).encode('utf-8')).hexdigest()
         try:
             transaction = Transaction.objects.get(remote_id=remote_id)
-        # @todo Only catch DoesNotExist errors.
-        except:
+        except Transaction.DoesNotExist:
             transaction = Transaction(remote_id=remote_id)
 
         # @todo Import the following columns: 8, 16, 17, 18. Design a way to
-        #  set transaction types (POS, ATM, wire transfer, direct debit, ...)
+        #  set transaction types (POS, ATM, wire transfer, direct debit,
+        # ...) In other words: through which medium was the transaction made?
+        # ''  : ?
+        # 'gb': Non-euro ATM?
+        # 'tb': ?
+        # 'sb': Maybe incoming SEPA wire transfer?
+        # 'ga': ATM, domestic and foreign. Seems like EUR only.
+        # 'bg': Wire transfers, including scheduled ones. Includes SEPA
+        #       debit transfers.
+        # 'db': Charges imposed by the bank?
+        # 'id': iDEAL
+        # 'ac': Acceptgiro
+        # 'cb': "Creditbetaling"?. Several wire incoming wire transfers with
+        #       opposing IBANs available.
+        # 'bc': ?
+        # 'ei': "Euro-incasso"? Always has the last SEPA fields. Direct debit.
+        # 'ba': "Betaalautomaat"? Looks like PoS terminals worldwide.
 
         # Set the description early, because we need to analyze it later.
         transaction.description = ' '.join(
