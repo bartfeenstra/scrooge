@@ -25,6 +25,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'scrooge-app',
     'scrooge',
+    'djmoney',
+    'rules',
 ]
 
 MIDDLEWARE = [
@@ -37,7 +39,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'scrooge.urls'
+ROOT_URLCONF = 'scrooge-app.urls'
+
+AUTHENTICATION_BACKENDS = (
+    # The Rules back-end MUST come before Django's own back-end, so our rules
+    # can prevent other back-ends from being used by raising exceptions. See
+    # _user_has_perm() in django.contrib.auth. See User.has_perm() for why
+    # we cannot prevent superusers from being granted permission.
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 TEMPLATES = [
     {
@@ -55,7 +66,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'scrooge.wsgi.application'
+WSGI_APPLICATION = 'scrooge-app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases

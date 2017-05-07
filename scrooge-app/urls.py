@@ -1,3 +1,6 @@
+from django.conf.urls import url
+from django.contrib import admin
+
 urlpatterns = [
-    # This is a CLI app for now.
+    url(r'^admin/', admin.site.urls),
 ]
