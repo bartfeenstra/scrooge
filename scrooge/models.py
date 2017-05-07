@@ -58,7 +58,7 @@ def rule_transaction_is_editable(permission: str):
             # so other back-ends get a chance to decide.
             return user.has_perm(permission)
         # The transaction is not editable.
-        raise PermissionDenied(transaction.remote_id)
+        raise PermissionDenied()
 
     return transaction_is_editable
 
