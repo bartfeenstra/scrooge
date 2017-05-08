@@ -65,8 +65,11 @@ class RabobankCsvParser(Parser):
 
         transaction = Transaction()
         transaction.remote_id = remote_id
-        own_account, own_account_created = Account.objects.get_or_create(
-            number=row[0])
+        try:
+            own_account = Account.objects.get(number=row[0])
+        except Account.DoesNotExist:
+            own_account = Account(number=row[0], label=row[0])
+            own_account.save()
         transaction.own_account = own_account
         transaction.opposing_name = row[6]
         transaction.amount = Money(Decimal(row[4]), get_currency(row[1]))

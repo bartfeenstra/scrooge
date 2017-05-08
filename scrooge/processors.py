@@ -18,8 +18,12 @@ class Processor(object):
 
 class TaggingProcessor(Processor):
     @contract
-    def add_tag(self, transaction: Transaction, tag_name: str):
-        tag, tag_created = Tag.objects.get_or_create(name=tag_name)
+    def add_tag(self, transaction: Transaction, tag_name: str, tag_label:
+                str = ''):
+        tag, _ = Tag.objects.get_or_create(name=tag_name)
+        if tag.label == '':
+            tag.label = tag_label
+            tag.save()
         transaction.tags.add(tag)
 
 
@@ -34,7 +38,7 @@ class AlbertHeijn(TaggingProcessor):
             for needle in needles:
                 if re.fullmatch('^.*%s.*$' % needle, transaction.description,
                                 re.I) is not None:
-                    self.add_tag(transaction, 'albert-heijn')
+                    self.add_tag(transaction, 'albert-heijn', 'Albert Heijn')
 
 
 class Atm(TaggingProcessor):
@@ -44,7 +48,7 @@ class Atm(TaggingProcessor):
         #  transaction type.
         if re.fullmatch('^.*Geldautomaat \d\d:\d\d pasnr. \d\d\d.*$',
                         transaction.description) is not None:
-            self.add_tag(transaction, 'atm')
+            self.add_tag(transaction, 'atm', 'ATM')
 
 
 class Pos(TaggingProcessor):
@@ -54,7 +58,7 @@ class Pos(TaggingProcessor):
         #  transaction type.
         if re.fullmatch('^.*Betaalautomaat \d\d:\d\d pasnr. \d\d\d.*$',
                         transaction.description) is not None:
-            self.add_tag(transaction, 'pos')
+            self.add_tag(transaction, 'pos', 'Point of Sale')
 
 
 @contract

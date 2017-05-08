@@ -1,6 +1,6 @@
 appdirs==1.4.3
 decorator==4.0.11
-Django==1.11
+Django==1.11.1
 django-iban-field==0.8
 django-money==0.10.2
 flake8==3.3.0
@@ -12,4 +12,5 @@ PyContracts==1.7.15
 pyflakes==1.5.0
 pyparsing==2.2.0
 pytz==2017.2
+rules==1.2
 six==1.10.0
